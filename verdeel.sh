@@ -48,15 +48,6 @@ done
 echo Trying to adjust for student creativity.
 "$MYDIR"/antifmt.sh */
 
-if [ "$CSV" ]; then
-        echo Identifying submissions
-        "$MYDIR"/identify.sh "$CSV" */
-fi
-
-echo 
-echo Trial compilation
-"$MYDIR"/trialc.sh */
-
 echo
 echo Doing a rough plagiarism check
 "$MYDIR"/dupes.sh */ || exit 1
