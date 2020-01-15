@@ -98,29 +98,3 @@ else
     unveil_ta
     "$MYDIR"/hak3.sh "${!email[@]}"
 fi
-
-# now we have divided the workload, send it out to the ta's
-humor=$(iching.sh)
-for ta in "${!email[@]}"
-do
-    cp -n "$MYDIR"/{pol.sh,rgrade.sh,collectplag.sh} "$ta"
-    if [ "$CSV" ]; then
-        echo "OrgDefinedId,$grade,End-of-Line Indicator" > "$ta/grades.csv"
-        cp -n "$MYDIR"/{grades.sh,feedback.sh} "$ta"
-        sed -f - "$MYDIR"/mailto.sh > "${ta}/mailto.sh" <<-...
-            /^FROM=/c\
-            FROM="${email[$ta]}"
-            /^PREFIX=/c\
-            PREFIX="${SUBJECT}: $assignment"
-	...
-        chmod +x "${ta}"/mailto.sh
-    fi
-    if [ "${email[$ta]}" ]; then
-        echo Mailing "$ta"
-        pkt="$ta-${zip%.zip}.7z"
-        7za a -ms=on -mx=9 "$pkt" "$ta" > /dev/null
-        #echo "$humor" | mailx -n -s "${SUBJECT} ${zip%.zip}" -a "$pkt" "${email[$ta]}" 
-        echo "$humor" | mutt -s "${SUBJECT}: ${zip%.zip}" -a "$pkt" -- "${email[$ta]}" 
-        rm -f "$pkt"
-    fi
-done
