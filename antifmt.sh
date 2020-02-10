@@ -55,7 +55,7 @@ for studdir in "$@"; do
 
 	# uncompress archives; do this twice to get nested zip files as well
 	for pass in 0 1; do
-			for file in "$studdir"/*.zip "$studdir"/*.rar "$studdir"/*.7z; do
+			for file in "$studdir"/**/*.zip "$studdir"/**/*.rar "$studdir"/**/*.7z; do
 				#7z e -y -o"${zip%/*}" "$zip" > "${zip}.contents"
 				decrunch="${unpack["`file --brief --mime-type "$file"`"]}"
 				if [ "${file##*.}" != "${decrunch##*.}" ]; then
