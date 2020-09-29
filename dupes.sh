@@ -3,10 +3,10 @@
 MYDIR="${0%/*}"
 DIFF="diff --ignore-all-space --minimal --side-by-side --width=160 --left-column"
 
-# All whitelisted files should be in this directory, one level up of the current working directory.
+# All nicelisted files should be in this directory, one level up of the current working directory.
 # It should not be in the CWD to not be confused with a student submission.
-# It is okay if this directory does not exist, the whitelist feature is then not used.
-WHITELISTDIR="../plagiarism-whitelist"
+# It is okay if this directory does not exist, the nicelist feature is then not used.
+NICELISTDIR="../plagiarism-nicelist"
 
 author() {
     echo "${1%%/*}"
@@ -45,29 +45,30 @@ fi
 # the fingerprints of all student submissions
 declare -A fingerprints
 
-# the fingerprints of the whitelisted files
-declare -A whitelist
+# the fingerprints of the nicelisted files
+declare -A nicelist
 
 # enable recursive globbing **/*.java
 shopt -s globstar
 
-# for now, exit if plagiarism whitelist directory does not exist
-test -e "$WHITELISTDIR" || { echo "plagiarism whitelist does not exist"; exit 1; }
+# for now, exit if plagiarism nicelist directory does not exist
+test -e "$NICELISTDIR" || { echo "plagiarism nicelist does not exist"; exit 1; }
 
-for file in "$WHITELISTDIR"/**/*.java; do
-    # if there are no whitelisted files we get the glob expression, because shell programming
-    test -e "$file" || break
-    whitelist[`fingerprint "$file"`]="$file"
+for file in "$NICELISTDIR"/**/*; do
+    # if there are no nicelisted files we get the glob expression, because shell programming
+    # also we glob directories, which we also want to avoid checking
+    test -f "$file" || break
+    nicelist[`fingerprint "$file"`]="$file"
 done
 
 echo Dupechecking
 for arg in "$@"; do
-    for file in "$arg"/**/*.java; do
-        test -e "$file" || break
-        test -e "${file}.SUSPECT" && continue
+    for file in "$arg"/**/*; do
+	#check we are indeed dealing with a file and it is not an archive contents list
+        test -f "$file" && [ "${file: -9}" != ".contents" ] || continue
         code=`fingerprint "$file"`
-        # only if length of fingerprint exceeds a certain size, and the file is not whitelisted
-        if [ "${#code}" -ge 42 ] && [ -z "${whitelist[$code]}" ]; then
+        # only if length of fingerprint exceeds a certain size, and the file is not nicelisted
+        if [ "${#code}" -ge 42 ] && [ -z "${nicelist[$code]}" ]; then
             found="${fingerprints[$code]}"
             if [ -z "$found" ]; then
                 fingerprints[$code]="$file"
