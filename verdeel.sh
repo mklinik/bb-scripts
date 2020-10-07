@@ -41,7 +41,7 @@ fi
 # first check whether the working dir is clean
 for ta in "${!email[@]}"; do
         if [ -d "$ta" ]; then
-                echo $ta exists. Clean up first (Can be done by calling this script with -c as arg).
+                echo "$ta exists. Clean up first (Can be done by calling this script with -c as arg)."
                 exit
         fi
 done
