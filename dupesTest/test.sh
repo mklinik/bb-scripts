@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 . ../dupesLib.sh
 declare -A array
-initNiceList nicelistDir "java hs" array
+initNiceList "niceList dir" "java hs" array
 if [ ${#array[@]} != 2 ]; then
     echo "Test failed"
     exit 1

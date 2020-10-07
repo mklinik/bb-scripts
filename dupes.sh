@@ -19,18 +19,13 @@ declare -A fingerprints
 # the fingerprints of the nicelisted files
 declare -A nicelist
 
-# enable recursive globbing **/*
-shopt -s globstar
-
 # for now, exit if plagiarism nicelist directory does not exist
 test -e "$NICELISTDIR" || { echo "plagiarism nicelist does not exist"; exit 1; }
 
 echo Dupechecking
 initNiceList "$NICELISTDIR" "$niceListFileExts" nicelist
 for arg in "$@"; do
-    for file in "$arg"/**/*; do
-	#check we are indeed dealing with a file and it is not an archive contents list
-        test -f "$file" && [ "${file: -9}" != ".contents" ] || continue
+    while read -r -d $'\0' file; do
         code=`fingerprint "$file"`
         # only if length of fingerprint exceeds a certain size, and the file is not nicelisted
         if [ "${#code}" -ge 42 ] && [ -z "${nicelist[$code]}" ]; then
@@ -52,6 +47,6 @@ for arg in "$@"; do
                 echo "" >> "${found}.WARNING"
             fi
         fi
-    done
+    done < <(eval $(buildFindString "$arg" "$niceListFileExts"))
 done
 

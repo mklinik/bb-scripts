@@ -31,16 +31,23 @@ fingerprint() {
 #https://unix.stackexchange.com/questions/462068/bash-return-an-associative-array-from-a-function-and-then-pass-that-associative
 initNiceList() {
     #local declaration, call-by-name passing
-    declare -n nicelist="$3"
-    local cmdString="find $1"
-    for ext in $2
-    do
-	cmdString=${cmdString}" -type f -name '*.$ext' -print0 -o"
-    done
-    cmdString=${cmdString: 0:-3} #remove trailing -o
-    while read -d $'\0' file; do
-	nicelist[`fingerprint "$file"`]="$file"
-    done < <(eval $cmdString)
+    #have to use a different name because of https://stackoverflow.com/questions/33775996/circular-name-reference
+    declare -n _nicelist="$3"
+    while read -r -d $'\0' file; do
+	_nicelist[$(fingerprint "$file")]="$file"
+    done < <(eval $(buildFindString "$1" "$2"))
     # ^^we need a clever workaround to not lose the map to a subshell:
     # http://mywiki.wooledge.org/ProcessSubstitution
+}
+
+# arg1: dir
+# arg2: niceListFileExts
+buildFindString() {
+    local findString="find \"$1\""
+    for ext in $2
+    do
+	findString=${findString}" -type f -name '*.$ext' -print0 -o"
+    done
+    findString=${findString: 0:-3} #remove trailing -o
+    echo $findString
 }
