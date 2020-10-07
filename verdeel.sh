@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 # TODO: 
 # - distribution of csv files to TA's is not currently handled
@@ -10,37 +10,31 @@
 #   what is blocking: figure out how to use group info provided by BrightSpace
 # ---------------------- configuratie ------------------------#
 
-if [! -f config.sh]; then
-    echo "Expecting configuration in config.sh. Refer to the template file config_template.sh"
-    exit 1
-fi
-# This will input/source the contents of the config.sh file, which
-# will not be tracked by git.
-
-. config.sh
+MYDIR="${0%/*}"
+. $MYDIR/loadConfig.sh
 
 # ---------------------- end of config -----------------------#
 
 # this script takes care of the distribution of workload over
-# all the teaching assistants, after downloading the zip
-
-for cmd in 7za mutt; do
-        if ! command -v $cmd >/dev/null 2>&1; then
-                echo "Who am I? Why am I here? Am I on lilo? $cmd is missing!" >& 2
-                exit 1
-        fi
-done
+# all the teaching assistants
 
 shopt -s nullglob
 set -e
 
-MYDIR="${0%/*}"
 PATH="${PATH}:${MYDIR}"
+
+if [ "$1" == "-c" ]; then
+    for ta in "${!email[@]}"; do
+	echo "Removing $ta"
+	rm -r $ta || continue
+    done
+    exit
+fi
 
 # first check whether the working dir is clean
 for ta in "${!email[@]}"; do
         if [ -d "$ta" ]; then
-                echo $ta exists. Clean up first.
+                echo "$ta exists. Clean up first (Can be done by calling this script with -c as arg)."
                 exit
         fi
 done

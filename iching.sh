@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 if ! command -v curl >/dev/null 2>&1; then
 	echo "Who am I? Why am I here? Am I on lilo? curl is missing!" >& 2
